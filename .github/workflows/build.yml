@@ -1,10 +1,12 @@
-name: SonarQube
+name: SonarQube Security Analysis
 on:
   push:
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - main
 jobs:
   build:
     name: Build and analyze
@@ -32,3 +34,60 @@ jobs:
         run: |
           echo "Quality Gate status will be checked by SonarQube scan step"
           echo "If Quality Gate fails, the workflow will fail automatically"
+
+      # Email 通知步驟 - 當檢測到安全問題時發送
+      - name: Send Email Notification on Failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚨 SonarQube 檢測到安全問題 - ${{ github.repository }}"
+          to: ${{ secrets.EMAIL_TO }}
+          from: SonarQube Security Bot
+          body: |
+            ## 🚨 安全問題檢測報告
+
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Commit:** ${{ github.sha }}
+            **Author:** ${{ github.actor }}
+            **Commit Message:** ${{ github.event.head_commit.message }}
+
+            ---
+
+            ### ❌ SonarQube Quality Gate 失敗
+
+            您的代碼未通過 SonarQube 安全檢查。可能的問題包括：
+            - 🔴 Security Hotspots（需要審查的安全敏感代碼）
+            - 🔴 硬編碼憑證（密碼、API Keys）
+            - 🔴 Buffer Overflow 風險
+            - 🔴 使用不安全的函數（strcpy, gets, sprintf 等）
+
+            ---
+
+            ### 📊 詳細報告
+
+            **SonarCloud 報告：**
+            https://sonarcloud.io/dashboard?id=Andy106084_iot-demo-project
+
+            **GitHub Actions 運行：**
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            **Commit 詳情：**
+            ${{ github.event.head_commit.url }}
+
+            ---
+
+            ### 🔧 下一步行動
+
+            1. 查看 SonarCloud 上的詳細問題列表
+            2. 修復所有安全問題
+            3. 重新提交代碼
+            4. 等待 SonarQube 檢查通過後才能合併
+
+            ---
+
+            此郵件由 GitHub Actions 自動發送。
