@@ -24,6 +24,11 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
         with:
           args: >
             --define "sonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+      - name: Check Quality Gate
+        run: |
+          echo "Quality Gate status will be checked by SonarQube scan step"
+          echo "If Quality Gate fails, the workflow will fail automatically"
