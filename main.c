@@ -1,11 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-// 弱點 1: 緩衝區太小，容易 Buffer Overflow
-void connect_wifi(char *input_ssid) {
-    char ssid[10]; // 緩衝區太小
-    
     // 弱點 2: 使用不安全的 strcpy - 沒有邊界檢查
     strcpy(ssid, input_ssid); 
     printf("Connecting to WiFi: %s\n", ssid);
