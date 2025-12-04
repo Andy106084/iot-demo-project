@@ -1,30 +1,54 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-// 模擬 IoT 設備的連接功能
+// 弱點 1: 緩衝區太小，容易 Buffer Overflow
 void connect_wifi(char *input_ssid) {
-    char ssid[10]; // 弱點 1: 緩衝區太小，容易 Buffer Overflow
+    char ssid[10]; // 緩衝區太小
     
-    // 弱點 2: 使用不安全的 strcpy
+    // 弱點 2: 使用不安全的 strcpy - 沒有邊界檢查
     strcpy(ssid, input_ssid); 
     printf("Connecting to WiFi: %s\n", ssid);
 }
 
+// 弱點 3: Hardcoded Credentials (硬編碼憑證)
 void check_admin() {
-    // 弱點 3: Hardcoded Credentials (硬編碼憑證) -> 這是 Security Hotspot 重點
-    char *password = "123456"; 
+    char *password = "admin123";  // Security Hotspot
+    char *api_key = "sk-1234567890abcdefghijklmnop";  // 另一個硬編碼密鑰
     
-    if (strcmp(password, "123456") == 0) {
+    if (strcmp(password, "admin123") == 0) {
         printf("Admin Login Success!\n");
+        printf("API Key: %s\n", api_key);
     }
+}
+
+// 弱點 4: 使用極度危險的 gets() 函數
+void unsafe_input() {
+    char buffer[50];
+    printf("Enter your name: ");
+    gets(buffer);  // 極度危險！沒有任何邊界檢查，已被 C11 標準移除
+    printf("Hello, %s\n", buffer);
+}
+
+// 弱點 5: sprintf 沒有邊界檢查
+void format_string_vuln(char *user_input) {
+    char output[20];
+    sprintf(output, "User: %s", user_input);  // 危險！應該用 snprintf
+    printf("%s\n", output);
 }
 
 int main() {
     printf("IoT Device Starting...\n");
     check_admin();
     
-    // 模擬接收外部過長的輸入
-    connect_wifi("SuperLongWiFiNameThatWillCrashTheSystem"); 
+    // 觸發 Buffer Overflow
+    connect_wifi("SuperLongWiFiNameThatWillDefinitelyCrashTheSystem");
+    
+    // 觸發 gets() 危險函數警告
+    // unsafe_input();  // 註解掉避免編譯時就失敗
+    
+    // 觸發 sprintf 問題
+    format_string_vuln("VeryLongUserInputThatExceedsBuffer");
     
     return 0;
 }
