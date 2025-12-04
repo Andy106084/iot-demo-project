@@ -12,7 +12,7 @@ void connect_wifi(char *input_ssid) {
 }
 
 // 弱點 3: Hardcoded Credentials (硬編碼憑證)
-void check_admin() {
+void check_admin() { 
     char *password = "admin123";  // Security Hotspot
     char *api_key = "sk-1234567890abcdefghijklmnop";  // 另一個硬編碼密鑰
     
